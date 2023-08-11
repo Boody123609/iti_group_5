@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled2/views/data_page.dart';
 class HomePage extends StatefulWidget {
     String email;
    HomePage({Key? key, required this.email}) : super(key: key);
@@ -31,9 +32,19 @@ class _HomePageState extends State<HomePage> {
               onPressed: (){
                 Navigator.pop(context);
               }, icon: Icon(Icons.arrow_back),
+
             ),
           ),
-          body: Center(child: Text(widget.email)),
+          body: ListView(
+            children: [
+              Center(child: Text(widget.email)),
+              ElevatedButton(onPressed: (){
+                Navigator.push(context, MaterialPageRoute(builder: (context)=>DataPage()));
+              }, child: Text("Go TO Data"))
+
+
+            ],
+          ),
 
         );
 
