@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
               onPressed: (){
                 Navigator.pop(context);
               }, icon: Icon(Icons.arrow_back),
+
             ),
           ),
           body: Center(child: Text(widget.email)),

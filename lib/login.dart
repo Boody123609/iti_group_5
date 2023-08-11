@@ -52,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 50,
             ),
             TextFormField(
+              //validator
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter your password';
