@@ -1,13 +1,13 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'home.dart';
 
 class LoginScreen extends StatefulWidget {
-
-
-
-  LoginScreen({Key? key,}) : super(key: key);
+  LoginScreen({
+    Key? key,
+  }) : super(key: key);
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -17,10 +17,10 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final _formKey = GlobalKey<FormState>();
-    TextEditingController emailController=TextEditingController();
+    TextEditingController emailController = TextEditingController();
+    TextEditingController passwordController = TextEditingController();
     return Scaffold(
-
-      body:Form(
+      body: Form(
         key: _formKey,
         child: ListView(
           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -52,6 +52,7 @@ class _LoginScreenState extends State<LoginScreen> {
               height: 50,
             ),
             TextFormField(
+              controller: passwordController,
               //validator
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -68,19 +69,29 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
             ElevatedButton(
                 style: ButtonStyle(
-                    backgroundColor:
-                        MaterialStateColor.resolveWith((states) => Colors.blue)),
+                    backgroundColor: MaterialStateColor.resolveWith(
+                        (states) => Colors.blue)),
                 onPressed: () async {
-                  Navigator.push(context, MaterialPageRoute(builder: (context)=>HomePage(
-                    email: emailController.text,
-                  )));
                   if (_formKey.currentState!.validate()) {
-                    final SharedPreferences prefs = await SharedPreferences.getInstance();
-                    await prefs.setString('email', emailController.text);
+                    bool result = await fireBaseLogin(
+                        emailController.text, passwordController.text);
+                    if (result == true) {
+                      final SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await prefs.setString('email', emailController.text);
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => HomePage(
+                                    email: emailController.text,
+                                  )));
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("faild Login")),
+                      );
+                    }
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text("Succeed Login")),
-                    );
+
                   }
                 },
                 child: Text("Login")),
@@ -102,5 +113,22 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  Future<bool> fireBaseLogin(String email, String password) async {
+    try {
+      UserCredential userCredential = await FirebaseAuth.instance
+          .createUserWithEmailAndPassword(email: email, password: password);
+      if (userCredential.user != null) {
+        return true;
+      }
+    } on FirebaseAuthException catch (e) {
+      if (e.code == 'weak-password') {
+        print('The password provided is too weak.');
+      } else if (e.code == 'email-already-in-use') {
+        print('The account already exists for that email.');
+      }
+    }
+    return false;
   }
 }
